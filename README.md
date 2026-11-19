@@ -1,68 +1,113 @@
 # Authentik TOTP MFA Lab
 
-## What it does
+Adds a second login factor to Authentik. After entering their password, users must type a 6-digit code from an authenticator app. Users who haven't set up MFA yet are sent to a QR-code enrollment screen before they can finish logging in.
 
-Adds a second login factor to Authentik. After the password, users have to type a 6-digit code from an authenticator app (Google Authenticator). Users who haven't set up MFA yet get sent to a QR-code enrollment screen before they can finish logging in.
+> Built in a personal lab environment, not in production.
 
-## What it runs on
+## Contents
 
-- **Identity provider:** Authentik
-- **MFA method:** TOTP (time-based one-time password), 6 digits, 30-second codes
-- **Authenticator app:** Authenticator app
+- [The problem and the fix](#the-problem-and-the-fix)
+- [Tech stack](#tech-stack)
+- [How the login flow works](#how-the-login-flow-works)
+- [Build steps](#build-steps)
+- [Testing](#testing)
+- [Screenshots](#screenshots)
+- [What I'd improve for a real company](#what-id-improve-for-a-real-company)
 
-## How I built it
-
-1. **Learned how Authentik's flows and stages fit together.** A *flow* is an ordered list of *stages*, and *stage bindings* set the order. The default login flow goes Identification → Password → Authenticator Validation → User Login.
-2. **Set up the TOTP Authenticator Setup stage.** This is the stage that shows the QR code and saves the user's device (6 digits).
-3. **Configured the Authenticator Validation stage** in the login flow:
-   - Device classes: **TOTP**
-   - Not configured action: **Force the user to configure an authenticator**
-   - Configuration stages: the TOTP setup stage from step 2
-4. **Checked the stage bindings** so the code check runs after the password and before the user is logged in.
-5. **Created a test user** (`mfa-testuser`) and set a password.
-6. **Signed in as that user from a private window.** After the password, Authentik showed the QR code. I scanned it with the authenticator app, entered the code, and reached the user dashboard.
-7. **Signed in again** and was asked for a code instead of the QR code. I confirmed that a wrong or expired code is rejected.
-
-## The thing I fixed
+## The problem and the fix
 
 **Problem:** Logging in to Authentik only needed a password. If a password was guessed, phished or leaked, that alone was enough to get into the account.
 
-**Fix:** I added a second layer of security. Users now have to enter a 6-digit code from an authenticator app on their phone after their password. A stolen password alone is no longer enough to log in.
+**Fix:** I added a second layer of security. After their password, users now have to enter a 6-digit code from an authenticator app on their phone. A stolen password alone is no longer enough to log in.
+
+## Tech stack
+
+| Component | Choice |
+|---|---|
+| Identity provider | Authentik |
+| MFA method | TOTP (time-based one-time password), 6 digits, 30-second codes |
+| Authenticator app | Google Authenticator |
+
+## How the login flow works
+
+In Authentik, a *flow* is an ordered list of *stages*, and *stage bindings* set the order. The default login flow runs:
+
+```mermaid
+flowchart LR
+    A[Identification] --> B[Password]
+    B --> C{Authenticator Validation}
+    C -- "TOTP device enrolled" --> E[User Login]
+    C -- "No device yet" --> D[TOTP Authenticator Setup<br/>QR code]
+    D --> E
+```
+
+The code check sits after the password and before the user is logged in.
+
+## Build steps
+
+1. **Create the TOTP Authenticator Setup stage.** This stage shows the QR code and saves the user's device (6 digits).
+2. **Configure the Authenticator Validation stage** in the login flow:
+   - Device classes: **TOTP**
+   - Not configured action: **Force the user to configure an authenticator**
+   - Configuration stages: the TOTP setup stage from step 1
+3. **Check the stage bindings** so the code check runs after the password and before User Login.
+4. **Create a test user** (`mfa-testuser`) and set a password.
+
+## Testing
+
+| Test | Result |
+|---|---|
+| First sign-in as `mfa-testuser` from a private window | After the password, Authentik showed the QR code. Scanned it with the authenticator app, entered the code and reached the user dashboard. |
+| Second sign-in | Asked for a code instead of the QR code. |
+| Wrong or expired code | Rejected. |
+
+## Screenshots
+
+**Figure 1**
+
+<img width="780" height="570" alt="Figure 1" src="https://github.com/user-attachments/assets/1006df37-c948-42f9-896a-edcf91edc101" />
+
+**Figure 2**
+
+<img width="975" height="484" alt="Figure 2" src="https://github.com/user-attachments/assets/99c8c2c2-189b-42f9-a475-0359912020d6" />
+
+**Figure 3**
+
+<img width="975" height="352" alt="Figure 3" src="https://github.com/user-attachments/assets/dc8aa9a1-4781-4ada-a5d7-57fc0be4582a" />
+
+**Figure 4**
+
+<img width="975" height="262" alt="Figure 4" src="https://github.com/user-attachments/assets/a68f54d2-55ed-4308-a5c8-4629e663a82b" />
+
+**Figure 5**
+
+<img width="975" height="564" alt="Figure 5" src="https://github.com/user-attachments/assets/808c7f6a-361c-4f69-ad56-e7b734f49648" />
+
+**Figure 6**
+
+<img width="975" height="576" alt="Figure 6" src="https://github.com/user-attachments/assets/b29ffb94-1ef4-40a1-a2f0-daab7ad4601f" />
+
+**Figure 7**
+
+<img width="700" height="635" alt="Figure 7" src="https://github.com/user-attachments/assets/84fa199d-fb45-4b20-8f83-9eddbb81bc0c" />
+
+**Figure 8**
+
+<img width="975" height="221" alt="Figure 8" src="https://github.com/user-attachments/assets/f912cd3f-2845-4b73-9dee-858fd341bf6c" />
+
+**Figure 9**
+
+<img width="975" height="187" alt="Figure 9" src="https://github.com/user-attachments/assets/31befb3c-bf07-4727-9a96-341695f37eb9" />
+
+**Figure 10**
+
+<img width="740" height="609" alt="Figure 10" src="https://github.com/user-attachments/assets/43f0cd55-e081-4027-beb2-3f3366c44dc2" />
+
+**Figure 11**
+
+<img width="975" height="289" alt="Figure 11" src="https://github.com/user-attachments/assets/1cc65545-2396-47ab-9e95-53d086397ec2" />
 
 ## What I'd improve for a real company
 
 - **Phishing-resistant MFA:** offer WebAuthn/passkeys (YubiKey, Windows Hello, Touch ID) and require them for admins. TOTP codes can still be phished.
 - **Monitoring:** send Authentik events (failed MFA attempts, new device enrollments) to a SIEM and alert on spikes.
-
-## Where I built it
-
-In a personal lab environment, not in production.
-
-See the process of the steps taken above.
-
-<img width="780" height="570" alt="Picture2" src="https://github.com/user-attachments/assets/1006df37-c948-42f9-896a-edcf91edc101" />
-
-<img width="975" height="484" alt="image" src="https://github.com/user-attachments/assets/99c8c2c2-189b-42f9-a475-0359912020d6" />
-
-<img width="975" height="352" alt="image" src="https://github.com/user-attachments/assets/dc8aa9a1-4781-4ada-a5d7-57fc0be4582a" />
-
-<img width="975" height="262" alt="image" src="https://github.com/user-attachments/assets/a68f54d2-55ed-4308-a5c8-4629e663a82b" />
-
-<img width="975" height="564" alt="image" src="https://github.com/user-attachments/assets/808c7f6a-361c-4f69-ad56-e7b734f49648" />
-
-<img width="975" height="576" alt="image" src="https://github.com/user-attachments/assets/b29ffb94-1ef4-40a1-a2f0-daab7ad4601f" />
-
-<img width="700" height="635" alt="Picture8" src="https://github.com/user-attachments/assets/84fa199d-fb45-4b20-8f83-9eddbb81bc0c" />
-
-<img width="975" height="221" alt="image" src="https://github.com/user-attachments/assets/f912cd3f-2845-4b73-9dee-858fd341bf6c" />
-
-<img width="975" height="187" alt="image" src="https://github.com/user-attachments/assets/31befb3c-bf07-4727-9a96-341695f37eb9" />
-
-<img width="740" height="609" alt="image" src="https://github.com/user-attachments/assets/43f0cd55-e081-4027-beb2-3f3366c44dc2" />
-
-<img width="975" height="289" alt="image" src="https://github.com/user-attachments/assets/1cc65545-2396-47ab-9e95-53d086397ec2" />
-
-
-
-
-
