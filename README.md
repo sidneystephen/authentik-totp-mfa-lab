@@ -2,7 +2,7 @@
 
 ## What it does
 
-Adds a second login factor to Authentik. After the password, users have to type a 6-digit code from an authenticator app (Google Authenticator, Microsoft Authenticator, Authy, etc.). Users who haven't set up MFA yet get sent to a QR-code enrollment screen before they can finish logging in.
+Adds a second login factor to Authentik. After the password, users have to type a 6-digit code from an authenticator app (Google Authenticator). Users who haven't set up MFA yet get sent to a QR-code enrollment screen before they can finish logging in.
 
 ## What it runs on
 
