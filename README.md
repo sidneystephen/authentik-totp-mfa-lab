@@ -7,7 +7,7 @@ Adds a second login factor to Authentik. After the password, users have to type 
 ## What it runs on
 
 - **Identity provider:** Authentik
-- **MFA method:** TOTP (time-based one-time passwords, RFC 6238), 6 digits, 30-second codes
+- **MFA method:** TOTP (time-based one-time password), 6 digits, 30-second codes
 - **Authenticator app:** Authenticator app
 
 ## How I built it
