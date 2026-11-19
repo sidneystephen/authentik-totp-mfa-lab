@@ -93,11 +93,11 @@ A walkthrough of the build and test, in order.
 
 <img width="700" height="635" alt="Figure 7" src="https://github.com/user-attachments/assets/84fa199d-fb45-4b20-8f83-9eddbb81bc0c" />
 
-**Figure 8:** The admin side after Kate set up MFA, showing her authenticator is now set up.
+**Figure 8:** Kate's own account (user side) after she logged in, showing her MFA is now set up.
 
 <img width="975" height="221" alt="Figure 8" src="https://github.com/user-attachments/assets/f912cd3f-2845-4b73-9dee-858fd341bf6c" />
 
-**Figure 9:** The admin event log, recording Kate's MFA setup.
+**Figure 9:** The admin side, confirming MFA has been set up for Kate, along with the event log.
 
 <img width="975" height="187" alt="Figure 9" src="https://github.com/user-attachments/assets/31befb3c-bf07-4727-9a96-341695f37eb9" />
 
