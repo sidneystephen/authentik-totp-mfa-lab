@@ -1,18 +1,8 @@
 # Authentik TOTP MFA Lab
 
-Adds a second login factor to Authentik. After entering their password, users must type a 6-digit code from an authenticator app. Users who haven't set up MFA yet are sent to a QR-code enrollment screen before they can finish logging in.
+In this lab I added a second login factor to Authentik. After entering their password, users must type a 6-digit code from an authenticator app. Users who haven't set up MFA yet are sent to a QR-code enrollment screen before they can finish logging in.
 
 > Built in a personal lab environment, not in production.
-
-## Contents
-
-- [The problem and the fix](#the-problem-and-the-fix)
-- [Tech stack](#tech-stack)
-- [How the login flow works](#how-the-login-flow-works)
-- [Build steps](#build-steps)
-- [Testing](#testing)
-- [Screenshots](#screenshots)
-- [What I'd improve for a real company](#what-id-improve-for-a-real-company)
 
 ## The problem and the fix
 
@@ -20,10 +10,7 @@ Adds a second login factor to Authentik. After entering their password, users mu
 
 **Fix:** I added a second layer of security. After their password, users now have to enter a 6-digit code from an authenticator app on their phone. A stolen password alone is no longer enough to log in.
 
-## Tech stack
-
-| Component | Choice |
-|---|---|
+## Tech 
 | Identity provider | Authentik |
 | MFA method | TOTP (time-based one-time password), 6 digits, 30-second codes |
 | Authenticator app | Google Authenticator |
@@ -46,7 +33,7 @@ The code check sits after the password and before the user is logged in.
 ## Build steps
 
 1. **Create the TOTP Authenticator Setup stage.** This stage shows the QR code and saves the user's device (6 digits).
-2. **Configure the Authenticator Validation stage** in the login flow:
+2. **Configured the Authenticator Validation stage** in the login flow:
    - Device classes: **TOTP**
    - Not configured action: **Force the user to configure an authenticator**
    - Configuration stages: the TOTP setup stage from step 1
