@@ -15,21 +15,6 @@ In this lab I added a second login factor to Authentik. After entering their pas
 | MFA method | TOTP (time-based one-time password), 6 digits, 30-second codes |
 | Authenticator app | Google Authenticator |
 
-## How the login flow works
-
-In Authentik, a *flow* is an ordered list of *stages*, and *stage bindings* set the order. The default login flow runs:
-
-```mermaid
-flowchart LR
-    A[Identification] --> B[Password]
-    B --> C{Authenticator Validation}
-    C -- "TOTP device enrolled" --> E[User Login]
-    C -- "No device yet" --> D[TOTP Authenticator Setup<br/>QR code]
-    D --> E
-```
-
-The code check sits after the password and before the user is logged in.
-
 ## Build steps
 
 1. **Create the TOTP Authenticator Setup stage.** This stage shows the QR code and saves the user's device (6 digits).
