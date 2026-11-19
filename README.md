@@ -1,65 +1,76 @@
-# Authentik TOTP MFA Lab
+# Authentik TOTP MFA Lab (Beginner)
 
-Adds a second login factor to Authentik. After entering their password, users must type a 6-digit code from an authenticator app. Users who haven't set up MFA yet are sent to a QR-code enrollment screen before they can finish logging in.
+In this lab I added a second step to logging in to Authentik. After typing their password, users also have to type a 6-digit code from an app on their phone. If someone hasn't set this up yet, Authentik shows them a QR code to scan before they can finish logging in.
 
-> Built in a personal lab environment, not in production.
+> I built this in my own practice lab, not on a real company system.
 
 ## Contents
 
+- [Key terms](#key-terms)
 - [The problem and the fix](#the-problem-and-the-fix)
-- [Tech stack](#tech-stack)
-- [How the login flow works](#how-the-login-flow-works)
+- [What I used](#what-i-used)
+- [How the login works](#how-the-login-works)
 - [Build steps](#build-steps)
 - [Testing](#testing)
 - [Screenshots](#screenshots)
 - [What I'd improve for a real company](#what-id-improve-for-a-real-company)
 
+## Key terms
+
+- **Authentik:** a free tool that handles logins for your apps. It's called an *identity provider*.
+- **MFA (multi-factor authentication):** logging in with more than one thing. Here that's something you know (your password) plus something you have (your phone).
+- **TOTP (time-based one-time password):** a 6-digit code made by an app on your phone. It changes every 30 seconds, so an old code stops working.
+- **Authenticator app:** the phone app that makes the codes. I used Google Authenticator.
+- **Flow:** the list of steps Authentik walks a user through, like logging in.
+- **Stage:** one step inside a flow, such as "enter your password".
+- **Stage binding:** the setting that puts a stage into a flow and decides its order.
+
 ## The problem and the fix
 
-**Problem:** Logging in to Authentik only needed a password. If a password was guessed, phished or leaked, that alone was enough to get into the account.
+**Problem:** Logging in to Authentik only needed a password. If someone guessed, phished or leaked a password, that was enough to get into the account.
 
-**Fix:** I added a second layer of security. After their password, users now have to enter a 6-digit code from an authenticator app on their phone. A stolen password alone is no longer enough to log in.
+**Fix:** I added a second step. After the password, users now type a 6-digit code from the authenticator app on their phone. A stolen password on its own is no longer enough to log in.
 
-## Tech stack
+## What I used
 
-| Component | Choice |
+| What | Choice |
 |---|---|
 | Identity provider | Authentik |
-| MFA method | TOTP (time-based one-time password), 6 digits, 30-second codes |
+| MFA method | TOTP: 6-digit codes that change every 30 seconds |
 | Authenticator app | Google Authenticator |
 
-## How the login flow works
+## How the login works
 
-In Authentik, a *flow* is an ordered list of *stages*, and *stage bindings* set the order. The default login flow runs:
+Authentik's login flow runs these stages in order:
 
 ```mermaid
 flowchart LR
-    A[Identification] --> B[Password]
-    B --> C{Authenticator Validation}
-    C -- "TOTP device enrolled" --> E[User Login]
-    C -- "No device yet" --> D[TOTP Authenticator Setup<br/>QR code]
+    A[Enter username] --> B[Enter password]
+    B --> C{Has the user set up MFA?}
+    C -- "Yes" --> E[Enter 6-digit code<br/>then logged in]
+    C -- "No" --> D[Scan QR code<br/>to set up MFA]
     D --> E
 ```
 
-The code check sits after the password and before the user is logged in.
+The code check happens after the password and before the user is logged in.
 
 ## Build steps
 
-1. **Create the TOTP Authenticator Setup stage.** This stage shows the QR code and saves the user's device (6 digits).
-2. **Configure the Authenticator Validation stage** in the login flow:
-   - Device classes: **TOTP**
-   - Not configured action: **Force the user to configure an authenticator**
-   - Configuration stages: the TOTP setup stage from step 1
-3. **Check the stage bindings** so the code check runs after the password and before User Login.
-4. **Create a test user** (Kate) and set a password.
+1. **Create the TOTP setup stage.** This is the stage that shows the QR code and saves the user's phone as their authenticator. I set it to 6-digit codes.
+2. **Set up the Authenticator Validation stage** in the login flow. This is the stage that checks the code. I chose:
+   - Device classes: **TOTP** (accept codes from an authenticator app)
+   - Not configured action: **Force the user to configure an authenticator** (anyone without MFA has to set it up)
+   - Configuration stages: the TOTP setup stage from step 1 (where to send them to set it up)
+3. **Check the stage bindings** so the code check comes after the password and before the user is logged in.
+4. **Create a test user** (Kate) and give her a password.
 
 ## Testing
 
-| Test | Result |
+| What I tested | What happened |
 |---|---|
-| Kate's first sign-in, from a private window | After the password, Authentik showed the QR code. Scanned it with the authenticator app, entered the code and reached the user dashboard. |
-| Kate's second sign-in | Asked for a code instead of the QR code. |
-| Wrong or expired code | Rejected. |
+| Kate logs in for the first time, in a private browser window | After her password, Authentik showed a QR code. I scanned it with the authenticator app, typed the code and reached her dashboard. |
+| Kate logs in again | Authentik asked for a code instead of showing the QR code. |
+| Typing a wrong or expired code | Authentik rejected it. |
 
 ## Screenshots
 
@@ -111,5 +122,5 @@ A walkthrough of the build and test, in order.
 
 ## What I'd improve for a real company
 
-- **Phishing-resistant MFA:** offer WebAuthn/passkeys (YubiKey, Windows Hello, Touch ID) and require them for admins. TOTP codes can still be phished.
-- **Monitoring:** send Authentik events (failed MFA attempts, new device enrollments) to a SIEM and alert on spikes.
+- **Stronger MFA:** TOTP codes can still be stolen by a fake login page (phishing). I'd offer passkeys or security keys (YubiKey, Windows Hello, Touch ID), which can't be phished that way, and make admins use them.
+- **Monitoring:** send Authentik's events, like failed code attempts and new phones being set up, to a SIEM (a tool that collects security logs) and get alerts when there's a sudden jump.
