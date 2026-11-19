@@ -51,14 +51,14 @@ The code check sits after the password and before the user is logged in.
    - Not configured action: **Force the user to configure an authenticator**
    - Configuration stages: the TOTP setup stage from step 1
 3. **Check the stage bindings** so the code check runs after the password and before User Login.
-4. **Create a test user** (`mfa-testuser`) and set a password.
+4. **Create a test user** (Kate) and set a password.
 
 ## Testing
 
 | Test | Result |
 |---|---|
-| First sign-in as `mfa-testuser` from a private window | After the password, Authentik showed the QR code. Scanned it with the authenticator app, entered the code and reached the user dashboard. |
-| Second sign-in | Asked for a code instead of the QR code. |
+| Kate's first sign-in, from a private window | After the password, Authentik showed the QR code. Scanned it with the authenticator app, entered the code and reached the user dashboard. |
+| Kate's second sign-in | Asked for a code instead of the QR code. |
 | Wrong or expired code | Rejected. |
 
 ## Screenshots
@@ -93,7 +93,7 @@ A walkthrough of the build and test, in order.
 
 <img width="700" height="635" alt="Figure 7" src="https://github.com/user-attachments/assets/84fa199d-fb45-4b20-8f83-9eddbb81bc0c" />
 
-**Figure 8:** After Kate logged in, showing she wasn't set up with MFA yet.
+**Figure 8:** After scanning the QR code and entering her first code, Kate is logged in to her dashboard.
 
 <img width="975" height="221" alt="Figure 8" src="https://github.com/user-attachments/assets/f912cd3f-2845-4b73-9dee-858fd341bf6c" />
 
